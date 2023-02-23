@@ -6,6 +6,9 @@
 *.war
 *.node_modules
 *.build
+*.terraform
+*.terraform.lock.hcl
+*.packer
 # Logs
 logs
 
