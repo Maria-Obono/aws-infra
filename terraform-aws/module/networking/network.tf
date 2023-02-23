@@ -2,6 +2,7 @@ resource "aws_vpc" "maria" {
   cidr_block           = "10.0.0.0/16"
   instance_tenancy     = "default"
   enable_dns_hostnames = true
+  
   //assign_generated_ipv6_cidr_block = true
   tags = {
     Name = "maria"
@@ -138,3 +139,6 @@ resource "aws_route_table_association" "private-subnet-route-table-association3"
   subnet_id      = aws_subnet.private-subnet3.id
   route_table_id = aws_route_table.private-route-table.id
 }
+
+
+
