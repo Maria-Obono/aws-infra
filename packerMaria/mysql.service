@@ -1,0 +1,16 @@
+[Unit]
+Description=mysqlApp
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/node /home/ec2-user/myappA/mysql/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=mysqlApp
+User=ec2-user
+
+[Install]
+WantedBy=multi-user.target
+
