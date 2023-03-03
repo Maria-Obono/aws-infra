@@ -1,0 +1,66 @@
+# This is a basic workflow to help you get started with Actions
+
+name: packer-ami
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main"]
+  pull_request:
+    branches: [ "main" ]
+    
+    
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      
+
+
+      # Runs a single command using the runners shell
+      - name: Packer Init
+        run: packer init .
+        
+  
+      
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         aws-region: us-west-1
+        
+      - name: Packer Build - Branches
+        if: "startsWith(github.ref, 'refs/heads/')"
+        run: packer build .
+        
+      - name: Get HCP Packer Iteration ID from Packer Manifest
+        id: hcp
+        run: |
+         last_run_uuid=$(jq -r '.last_run_uuid' "./packer_manifest.json")
+         build=$(jq -r '.builds[] | select(.packer_run_uuid == "'"$last_run_uuid"'")' "./packer_manifest.json")
+         iteration_id=$(echo "$build" | jq -r '.custom_data.iteration_id')
+         echo "::set-output name=iteration_id::$iteration_id"    
+          echo Add other actions to build,
+          echo test, and deploy your project.
+          
+      - name: Create and set channel
+        working-directory: .github/scripts
+        run: |
+         channel_name=$( echo ${{github.ref_name}} | sed 's/\./-/g')
+         ./create_channel_iteration.sh $HCP_BUCKET_NAME $channel_name "${{ needs.build-image.outputs.iteration_id }}"
