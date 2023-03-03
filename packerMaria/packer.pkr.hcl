@@ -37,8 +37,8 @@ source "amazon-ebs" "ec2-user" {
   instance_type = "t2.micro"
   region        = "us-east-1"
   # AMI permissions
-  ami_users = ["691032928490","272647741966"]
-  ami_regions = ["us-west-2"]
+  ami_users = ["272647741966"]
+  ami_regions = ["us-east-1"]
   //source_ami    = "ami-0dfcb1ef8550277af"
   source_ami_filter {
     filters = {
@@ -65,35 +65,57 @@ build {
   ]
 
   provisioner "file" {
-    source      = "./mysql.service"
-    destination = "/tmp/mysql.service"
+    source = "./webapp-main.zip"
+    destination = "/home/ec2-user/webapp-main.zip"
+  }
+
+  provisioner "file" {
+    source = "./webapp-main.service"
+    destination = "/tmp/webapp-main.service"
   }
 
   provisioner "shell" {
+    script = "./app.sh"
+  }
 
-    inline = [
+  #provisioner "shell" {
 
-      "sudo yum update -y",
-      "sudo yum upgrade -y",
-      "sudo amazon-linux-extras install nginx1 -y",
-      "sudo systemctl enable nginx",
-      "sudo systemctl start nginx",
+   # inline = [
+
+     # "sudo yum update -y",
+     # "sudo yum upgrade -y",
+     # "sudo amazon-linux-extras install nginx1 -y",
+     # "sudo systemctl enable nginx",
+      #"sudo systemctl start nginx",
 
 
-      "sudo yum install -y gcc-c++ make",
-      "curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash - ",
-      "sudo yum install -y nodejs",
+      #"sudo yum install -y gcc-c++ make",
+      #"curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash - ",
+      #"sudo yum install -y nodejs",
 
-      "sudo yum install -y git",
-      "git clone https://github.com/Maria-Obono/myappA.git",
-      "cd myappA/mysql && npm install",
-      #"node server.js"
-      "sudo mv /tmp/mysql.service /etc/systemd/system/mysql.service",
-      "sudo systemctl enable mysql.service",
-      "sudo systemctl start mysql.service",
+      #"sudo yum install -y git",
+      #"git clone https://github.com/Maria-Obono/webapp.git",
 
-    ]
+#"sudo yum install unzip -y",
+#"cd && unzip webapp-main.zip",
+
+
+     # "cd /webapp-main && npm install",
+      
+     # "sudo mv /tmp/webapp-main.service /etc/systemd/system/webapp-main.service",
+     # "sudo systemctl enable webapp-main.service",
+      #"sudo systemctl start webapp-main.service",
+
+    #]
     
+ # }
+
+ post-processor "manifest" {
+    output     = "packer_manifest.json"
+    strip_path = true
+    custom_data = {
+      iteration_id = packer.iterationID
+    }
   }
  
  
