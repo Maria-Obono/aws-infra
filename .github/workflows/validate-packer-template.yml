@@ -9,13 +9,13 @@ on:
     branches-ignore: 
       - main
     paths:
-      - 'templates/aws_template.pkr.json'
+      - 'templates/aws_template.json'
 
   pull_request:
     branches-ignore: 
       - main
     paths:
-      - 'templates/aws_template.pkr.json'
+      - 'templates/aws_template.json'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -34,6 +34,6 @@ jobs:
       - name: Run Packer Container -Validate template
         uses: docker://hashicorp/packer:light
         with:
-           args: "validate /github/workspace/templates/aws_template.pkr.json"
+           args: "validate /github/workspace/templates/aws_template.json"
 
       

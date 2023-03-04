@@ -9,7 +9,7 @@ on:
     branches:  
        - main 
     paths:
-       - 'templates/aws_template.pkr.json' 
+       - 'templates/aws_template.json' 
  
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -34,4 +34,4 @@ jobs:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY}}
           AWS_SECRET_KEY: ${{ secret.AWS_SECRET_KEY }}
         with:
-          args: "build /github/workspace/templates/aws_template.pkr.json"
+          args: "build /github/workspace/templates/aws_template.json"
