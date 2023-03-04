@@ -16,27 +16,35 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
+   build:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    name: packer
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-      - name: Run packer container - Build & deploy
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       # Initialize Packer templates
       - name: Initialize Packer Template
         uses: hashicorp/packer-github-actions@master
         with:
-          command: init 
+          command: init
 
-      # Runs a set of commands using the runners shell
-      - uses: hashicorp/packer-github-actions@master
-        env: 
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY}}
-          AWS_SECRET_KEY: ${{ secret.AWS_SECRET_KEY }}
+     
+      # build artifact
+      - name: Build Artifact
+        uses: hashicorp/packer-github-actions@master
         with:
-          args: "build /github/workspace/templates/aws_template.json"
-
-      
+          command: build
+          arguments: "-color=false -on-error=abort"
+          target: 'templates/aws_template.json'
+        env:
+          PACKER_LOG: 1
