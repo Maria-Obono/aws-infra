@@ -31,6 +31,6 @@
             "ami_users": "{{user `destination_users`}}"
                 
             }
-        
     ]
+    
 }
