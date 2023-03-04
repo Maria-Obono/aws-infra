@@ -1,18 +1,19 @@
-
 provider "aws" {
-  
-alias = "pup"
+  //alias = "pup"
 region = "us-east-1"
-  profile = "dev"
+  profile = "demo"
 }
 
 
-provider "aws" {
-  alias= "lolo"
-  region = "us-west-2"
-  profile = "dev"
+//data "availability_zones" "available" {
+  //state= "available"
+//}
+//provider "aws" {
+  //alias= "lolo"
+  //region = "us-west-2"
+  //profile = "demo"
   
-}
+//}
 
   
 
