@@ -34,6 +34,6 @@ jobs:
       - name: Run Packer Container -Validate template
         uses: docker://hashicorp/packer:light
         with:
-           args: "validate /github/workspace/templates/aws_template.json"
+           args: "validate /github/workspace/templates/aws_template.pkr.json"
 
       
