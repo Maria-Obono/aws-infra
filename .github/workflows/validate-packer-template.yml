@@ -9,13 +9,13 @@ on:
     branches-ignore: 
       - main
     paths:
-      - 'templates/aws_template.json'
+      - 'templates/aws_template.pkr.json'
 
   pull_request:
     branches-ignore: 
       - main
     paths:
-      - 'templates/aws_template.json'
+      - 'templates/aws_template.pkr.json'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
