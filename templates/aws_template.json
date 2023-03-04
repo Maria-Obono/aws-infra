@@ -1,0 +1,36 @@
+{
+    "variables": {
+        "aws_access_key": "",
+        "aws_secret_key": "",
+        "destination_regions": "us-east-1",
+        "destination_users": "272647741966"
+    },
+
+    "builders": [
+        {
+            "ami_name": "my-packer-AMI",
+            "force_deregister": "true",
+            "force_delete_snapshot": "true",
+            "type": "amazon-ebs",
+            "access_key": "{{user `aws_access_key`}}",
+            "secret_key": "{{user `aws_secret_key`}}",
+            "region": "us-east-1",
+
+            "source_ami_filter" :{
+                "filters": {
+                  "name" : "amzn2-ami-hvm-2.*.1-x86_64-gp2",
+                  "root-device-type" :   "ebs",
+                  "virtualization-type": "hvm"
+                },
+                "most_recent": true,
+                "owners" : ["amazon"]
+              },
+              "ssh_username": "ec2-user",
+            "instance_type": "t2.micro",
+            "ami_regions": "{{user `destination_regions`}}",
+            "ami_users": "{{user `destination_users`}}"
+                
+            }
+        
+    ]
+}
