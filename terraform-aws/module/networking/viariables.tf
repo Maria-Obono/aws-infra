@@ -51,7 +51,6 @@ variable "settings" {
       engine= "mysql"
       instance_class= "db.t3.micro"
       multi_az= false
-      instance_class= "csye6225"
       db_name= "csye6225"
       identifier= "csye6225"
       publicity_accessibility= false
@@ -68,13 +67,13 @@ variable "settings" {
 variable "public_subnet_cidr_blocks" {
   description = "available CIDR blocks for public subnets"
   type = list(string)
-  default = [ "10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24" ]
+  default = [ "10.0.0.0/20", "10.0.16.0/20", "10.0.32.0/20" ]
 }
 
 variable "private_subnet_cidr_blocks" {
   description = "available CIDR blocks for private subnets"
   type = list(string)
-  default = [ "10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24" ]
+  default = [ "10.0.128.0/20", "10.0.144.0/20", "10.0.160.0/20" ]
 }
 
 variable "my_ip" {

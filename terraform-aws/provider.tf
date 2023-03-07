@@ -1,7 +1,7 @@
 provider "aws" {
   //alias = "pup"
 region = "us-east-1"
-  profile = "demo"
+  profile = "dev"
 }
 
 

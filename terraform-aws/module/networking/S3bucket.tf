@@ -1,7 +1,11 @@
+resource "random_id" "my-random-id" {
+byte_length = 8
+}
 resource "aws_s3_bucket" "private_bucket" {
-  bucket = "my-bucket-${var.environment}"
+  bucket = "my-bucket-${random_id.my-random-id.hex}"
   acl    = "private"
-
+  force_destroy = true
+  
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
@@ -20,45 +24,38 @@ resource "aws_s3_bucket" "private_bucket" {
     }
   }
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Deny"
-        Principal = "*"
-        Action = [
-          "s3:GetObject"
-        ]
-        Resource = [
-          //"${aws_s3_bucket.private_bucket.arn}/*"
-        ]
-        Condition = {
-          StringNotEquals = {
-            "aws:PrincipalArn": [
-              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.db_username}",
-              #"arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.administrator}"
-            ]
-          }
-        }
-      }
-    ]
-  })
+  
 
   tags = {
     Environment = var.environment
     Owner       = var.db_username
-    Name        = "my-bucket-${var.environment}"
+    Name        = "my-bucket-${random_id.my-random-id.hex}"
   }
 }
 
 data "aws_caller_identity" "current" {}
 
-//resource "random_id" "hex" {
-  //byte_length = 4
-//}
+resource "aws_s3_bucket_policy" "private" {
+  bucket = aws_s3_bucket.private_bucket.id
 
-
-
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "DenyInsecureTransport"
+        Effect = "Deny"
+        Principal = "*"
+        Action = "s3:*"
+        Resource = "${aws_s3_bucket.private_bucket.arn}/*"
+        Condition = {
+          Bool = {
+            "aws:SecureTransport": false
+          }
+        }
+      }
+    ]
+  })
+}
 
 
 
@@ -80,8 +77,7 @@ resource "aws_iam_policy" "WebAppS3" {
           "s3:DeleteObject*"
         ],
         "Resource" : [
-          "arn:aws:s3:::*/*",
-          "arn:aws:s3:::my-bucket-${var.environment}/*"
+          "arn:aws:s3:::my-bucket-${random_id.my-random-id.hex}/*"
         ]
       }
     ]

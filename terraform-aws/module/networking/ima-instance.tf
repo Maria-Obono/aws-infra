@@ -1,17 +1,17 @@
-resource "aws_key_pair" "TF_key" {
-  key_name   = "TF_key"
-  public_key = tls_private_key.rsa.public_key_openssh
-}
-  resource "tls_private_key" "rsa" {
-  algorithm   = "RSA"
-  rsa_bits = 4096
+//resource "aws_key_pair" "TF_key" {
+ // key_name   = "TF_key"
+ // public_key = tls_private_key.rsa.public_key_openssh
+//}
+ // resource "tls_private_key" "rsa" {
+ // algorithm   = "RSA"
+ // rsa_bits = 4096
   
-}
- resource "local_file" "TF-key" {
-  content   = tls_private_key.rsa.private_key_pem
-  filename = "tfkey"
+//}
+ //resource "local_file" "TF-key" {
+  //content   = tls_private_key.rsa.private_key_pem
+  //filename = "tfkey"
   
-}
+//}
 
 
 resource "aws_security_group" "app_sg" {
@@ -44,7 +44,8 @@ ingress {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks      = ["${var.my_ip}/32"]
+    //cidr_blocks      = ["${var.my_ip}/32"]
+    cidr_blocks = [ "0.0.0.0/0" ]
    
   }
 
@@ -70,12 +71,17 @@ ingress {
     Name = "Terraform_SG"
   }
 }
-
 data "aws_ami" "app_ami" {
+  executable_users = [ "272647741966" , "self"]
   most_recent      = true
   name_regex       = "-*"
-  owners           = ["self"]
+  //owners           = ["self"]
+   
+  
+  
 }
+
+
 
 resource "aws_instance" "web_application" {
   count = var.settings.web_app.count
@@ -84,7 +90,10 @@ resource "aws_instance" "web_application" {
   subnet_id = aws_subnet.public-subnet[count.index].id
   iam_instance_profile = aws_iam_instance_profile.maria_profile.id
 
-  key_name = aws_key_pair.TF_key.key_name
+  //key_name = aws_key_pair.TF_key.key_name
+  key_name = "Key"
+
+  
   
   vpc_security_group_ids = [aws_security_group.app_sg.id]
    
@@ -103,5 +112,8 @@ associate_public_ip_address = true
 
     }
 
+
+
 }
 
+ 

@@ -39,7 +39,7 @@ resource "aws_security_group" "database" {
 resource "aws_db_instance" "database-instance" {
   multi_az = false
   identifier                = var.settings.database.identifier
-  #allocated_storage         = 5
+  allocated_storage         = 8
   engine                    = var.settings.database.engine
   #engine_version            = "5.6.35"
   instance_class            = var.settings.database.instance_class
@@ -49,8 +49,8 @@ resource "aws_db_instance" "database-instance" {
   db_subnet_group_name      = aws_db_subnet_group.database-subnets.id
   vpc_security_group_ids    = [aws_security_group.database.id]
   publicly_accessible     = false
-  #skip_final_snapshot       = true
-  #final_snapshot_identifier = "Ignore"
+  skip_final_snapshot       = true
+  final_snapshot_identifier = "Ignore"
 }
 
 
