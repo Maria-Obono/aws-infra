@@ -1,0 +1,27 @@
+# .github/workflows/terraform.yml
+
+name: Access RDS Database
+
+on:
+  workflow_run:
+    workflows: ["Terraform Apply"]
+    types:
+      - completed
+
+jobs:
+  access_db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install MYSQL client
+        run: sudo yum update -y && sudo yum install mysql-client -y
+
+      - name: Connect to RDS Database
+        env:
+          DB_HOST: ${{ steps.get_db_endpoint.outputs.database_endpoint }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+        run: |
+    
+          mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASSWORD -e 'SHOW DATABASES;'"
