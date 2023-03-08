@@ -1,6 +1,7 @@
+
 [Unit]
-Description=mysqlApp
-After=multi-user.target
+Description=Cocktails App
+After=cloud-final.service
 
 [Service]
 WorkingDirectory=/home/ec2-user/mysql
@@ -9,7 +10,7 @@ Restart=always
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=mysqlApp
+SyslogIdentifier=mysql-app
 User=ec2-user
 
 [Install]

@@ -1,26 +1,28 @@
 packer {
   required_plugins {
     amazon = {
-      version = ">= 0.0.2"
+      version = ">= 1.0.0"
       source  = "github.com/hashicorp/amazon"
     }
   }
 }
 
-variable "aws_region" {
-  type    = string
-  default = "us-east-1"
-}
-
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
+variable "ami_users" {
+  type = list(string)
+  default = ["272647741966"]
+}
 
-source "amazon-ebs" "my_ec2" {
-  ami_name      = "packer-${local.timestamp}"
-  instance_type = "t2.micro"
-  region        = "${var.aws_region}"
-  ami_users     = ["272647741966"]
+source "amazon-ebs" "Mysql" {
+
+  access_key =  "AKIA2BZGFWDVEHXZ5BUA"
+  secret_key = "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"
+  region         = "us-east-1"
+  ami_name = "mysql-app-${local.timestamp}"
+  ami_users = ["272647741966"]
+
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-2.*.1-x86_64-gp2"
@@ -30,19 +32,21 @@ source "amazon-ebs" "my_ec2" {
     most_recent = true
     owners      = ["amazon"]
   }
-  ssh_username = "ec2-user"
+  # source_ami = "ami-013a129d325529d4d"
 
 
+  instance_type = "t2.micro"
+  //region        = "us-east-1"
+  ssh_username  = "ec2-user"
 }
 
 build {
-  name = "packer-ec2"
   sources = [
-    "source.amazon-ebs.my_ec2"
+    "source.amazon-ebs.Mysql"
   ]
 
   provisioner "file" {
-    source      = "../../mysql.zip"
+    source      = "./mysql.zip"
     destination = "/home/ec2-user/mysql.zip"
   }
 
@@ -52,26 +56,19 @@ build {
   }
 
   provisioner "shell" {
-
     inline = [
-      "sudo yum update -y",
-
-      "sudo yum install -y gcc-c++ make",
-      "curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -",
-      "sudo yum install -y nodejs",
-
-      "sudo yum install unzip -y",
-      "cd ~/ && unzip mysql.zip",
-      "cd ~/ mysql && npm i --only=prod",
-
-      "sudo mv /tmp/mysql.service /etc/systemd/system/mysql.service",
-      "sudo systemctl enable mysql.service",
-      "sudo systemctl start mysql.service",
-
+      "sudo yum update",
+      "sudo yum install -y mysql-client"
     ]
   }
 
-  // provisioner "shell" {
-  //  script= "./app.sh"
-  // }
+  provisioner "shell" {
+    script = "./app.sh"
+    environment_vars = [
+      "DB_HOST=<RDS Endpoint>",
+      "DB_USER=<RDS Username>",
+      "DB_PASSWORD=<RDS Password>",
+      "DB_NAME=<RDS Database Name>"
+    ]
+  }
 }
