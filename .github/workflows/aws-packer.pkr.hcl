@@ -64,11 +64,6 @@ build {
 
   provisioner "shell" {
     script = "./app.sh"
-    environment_vars = [
-      "DB_HOST=<RDS Endpoint>",
-      "DB_USER=<RDS Username>",
-      "DB_PASSWORD=<RDS Password>",
-      "DB_NAME=<RDS Database Name>"
-    ]
+    
   }
 }
