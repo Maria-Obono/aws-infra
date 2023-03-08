@@ -55,12 +55,6 @@ build {
     destination = "/tmp/mysql.service"
   }
 
-  provisioner "shell" {
-    inline = [
-      "sudo yum update",
-      "sudo yum install -y mysql-client"
-    ]
-  }
 
   provisioner "shell" {
     script = "./app.sh"
