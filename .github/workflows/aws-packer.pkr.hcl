@@ -7,9 +7,9 @@ packer {
   }
 }
 
-variable "ami_prefix" {
+variable "aws_region" {
   type    = string
-  default = "packer-aws-amazon-linux"
+  default = "us-east-1"
 }
 
 locals {
@@ -17,10 +17,10 @@ locals {
 }
 
 source "amazon-ebs" "my_ec2" {
-  ami_name      = "${var.ami_prefix}-${local.timestamp}"
+  ami_name      = "packer-${local.timestamp}"
   instance_type = "t2.micro"
-  region        = "us-east-1"
-  ami_users = ["272647741966"]
+  region        = "${var.aws_region}"
+  ami_users     = ["272647741966"]
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-2.*.1-x86_64-gp2"
@@ -31,41 +31,47 @@ source "amazon-ebs" "my_ec2" {
     owners      = ["amazon"]
   }
   ssh_username = "ec2-user"
+
+
 }
 
 build {
-  name    = "packer-ubuntu"
+  name = "packer-ec2"
   sources = [
-    "source.amazon-ebs.ubuntu_java"
+    "source.amazon-ebs.my_ec2"
   ]
 
   provisioner "file" {
-    source = "./myappA.zip"
-    destination = "/home/ec2-user/myappA.zip"
-  },
+    source      = "../../mysql.zip"
+    destination = "/home/ec2-user/mysql.zip"
+  }
 
   provisioner "file" {
-    source = "./myappA/mysql.service"
-    destination = "/tmp/myappA/mysql.service"
+    source      = "./mysql.service"
+    destination = "/tmp/mysql.service"
   }
 
   provisioner "shell" {
 
     inline = [
-      # Install MySQL client
-        
-        "sudo yum update"
-        "sudo yum install -y mysql-client"
-        "export DB_HOST=<your RDS endpoint>",
-        "export DB_USER=<your database username>",
-        "export DB_PASSWORD=<your database password>",
-        "export DB_NAME=<your database name>",
-        "mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD -D $DB_NAME -e \"SELECT 1;\""
-        
-    ]
-  },
+      "sudo yum update -y",
 
-  provisioner "shell" {
-    script= "./app.sh"
+      "sudo yum install -y gcc-c++ make",
+      "curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -",
+      "sudo yum install -y nodejs",
+
+      "sudo yum install unzip -y",
+      "cd ~/ && unzip mysql.zip",
+      "cd ~/ mysql && npm i --only=prod",
+
+      "sudo mv /tmp/mysql.service /etc/systemd/system/mysql.service",
+      "sudo systemctl enable mysql.service",
+      "sudo systemctl start mysql.service",
+
+    ]
   }
+
+  // provisioner "shell" {
+  //  script= "./app.sh"
+  // }
 }

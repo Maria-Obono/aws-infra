@@ -3,8 +3,8 @@ Description=mysqlApp
 After=multi-user.target
 
 [Service]
-WorkingDirectory=/home/ec2-user/myappA/mysql
-ExecStart=/usr/bin/node /home/ec2-user/myappA/mysql/server.js
+WorkingDirectory=/home/ec2-user/mysql
+ExecStart=/usr/bin/node /home/ec2-user/mysql/server.js
 Restart=always
 RestartSec=10
 StandardOutput=syslog
