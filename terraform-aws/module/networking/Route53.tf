@@ -7,7 +7,7 @@ resource "aws_route53_record" "webapp_dns" {
   zone_id = "${aws_route53_zone.zone.zone_id}"
   name    = var.domain_name
   type    = "A"
-  ttl     = "60"
+  ttl     = "600"
 
   records = [
     "${aws_instance.web_application[0].private_ip}"
@@ -21,7 +21,7 @@ resource "aws_route53_record" "www_dns" {
   zone_id = "${aws_route53_zone.zone.zone_id}"
   name    = "www.${var.domain_name}"
   type    = "A"
-  ttl     = "60"
+  ttl     = "600"
 
   records = [
     "${aws_eip.myApp_eip[0].public_ip}"
