@@ -104,12 +104,16 @@ resource "aws_instance" "web_application" {
 
   user_data = <<-EOF
               #!/bin/bash
+
+              sudo yum update -y
+              sudo yum install httpd -y
+              sudo service httpd start
+
               cd /home/ec2-user/Application
               
               echo "HOST_DB=\${aws_db_instance.database-instance.address}" >> .env
               echo "BUCKET_NAME=${aws_s3_bucket.private_bucket.bucket}" >> .env
               echo "AWS_ACCESS_KEY=AKIAT66YSMIHLIFBA3JD" >> .env
-              echo "AWS_SECRET_KEY=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" >> .env
               echo "USER_DB=csye6225" >> .env
               echo "PASSWORD_DB=MariaGloria1" >> .env
               echo "DB_NAME=csye6225" >> .env

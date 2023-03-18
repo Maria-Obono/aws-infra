@@ -102,3 +102,9 @@ variable "acl_value" {
     type = string
     default = "private"
 }
+
+variable "domain_name" {
+  default = "mariaobono.me"
+  description = "domain name"
+  type = string
+}
