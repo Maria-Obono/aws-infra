@@ -9,6 +9,7 @@ resource "aws_route53_record" "webapp_dns" {
   type    = "A"
   ttl     = "300"
 
+
   records = [
     //"${aws_instance.web_application[0].private_ip}"
     "${aws_eip.myApp_eip[0].public_ip}"
@@ -23,6 +24,7 @@ resource "aws_route53_record" "www_dns" {
   name    = "www.demo.${var.domain_name}"
   type    = "A"
   ttl     = "300"
+
 
   records = [
     "${aws_eip.myApp_eip[0].public_ip}"
