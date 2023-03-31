@@ -7,7 +7,8 @@ resource "aws_route53_record" "webapp_dns" {
   zone_id = "${data.aws_route53_zone.zone.zone_id}"
   name    = "demo.${var.domain_name}"
   type    = "A"
-  ttl     = "600"
+  ttl     = "300"
+
 
 
   records = [
@@ -23,7 +24,8 @@ resource "aws_route53_record" "www_dns" {
   zone_id = "${data.aws_route53_zone.zone.zone_id}"
   name    = "www.demo.${var.domain_name}"
   type    = "A"
-  ttl     = "600"
+  ttl     = "300"
+
 
 
   records = [
