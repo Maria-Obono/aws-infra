@@ -1,16 +1,17 @@
-resource "aws_route53_zone" "zone" {
-  name = var.domain_name
+data "aws_route53_zone" "zone" {
+  name = "demo.${var.domain_name}"
 }
 
 # Create Route53 A record
 resource "aws_route53_record" "webapp_dns" {
-  zone_id = "${aws_route53_zone.zone.zone_id}"
-  name    = var.domain_name
+  zone_id = "${data.aws_route53_zone.zone.zone_id}"
+  name    = "demo.${var.domain_name}"
   type    = "A"
-  ttl     = "60"
+  ttl     = "300"
 
   records = [
-    "${aws_instance.web_application[0].private_ip}"
+    //"${aws_instance.web_application[0].private_ip}"
+    "${aws_eip.myApp_eip[0].public_ip}"
   ]
 }
 
@@ -18,10 +19,10 @@ resource "aws_route53_record" "webapp_dns" {
 
 # Create Route53 record for www subdomain
 resource "aws_route53_record" "www_dns" {
-  zone_id = "${aws_route53_zone.zone.zone_id}"
-  name    = "www.${var.domain_name}"
+  zone_id = "${data.aws_route53_zone.zone.zone_id}"
+  name    = "www.demo.${var.domain_name}"
   type    = "A"
-  ttl     = "60"
+  ttl     = "300"
 
   records = [
     "${aws_eip.myApp_eip[0].public_ip}"
@@ -29,7 +30,7 @@ resource "aws_route53_record" "www_dns" {
 }
 
 output "ns-servers" {
-  value = "${aws_route53_zone.zone.name_servers}"
+  value = "${data.aws_route53_zone.zone.name_servers}"
 }
 output "web_public_ip" {
   description = "The public IP address of the web server"
