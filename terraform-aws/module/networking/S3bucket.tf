@@ -105,21 +105,17 @@ resource "aws_iam_role" "EC2-CSYE6225" {
       },
     ]
   })
-}
 
+ 
+}
 resource "aws_iam_role_policy_attachment" "some_bucket_policy" {
   role       = aws_iam_role.EC2-CSYE6225.name
   policy_arn = aws_iam_policy.WebAppS3.arn
 }
 
-resource "aws_iam_role_policy_attachment" "cloud_watch_policy" {
-  role       = aws_iam_role.EC2-CSYE6225.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-
-}
-
 resource "aws_iam_instance_profile" "maria_profile" {
   name = "maria-profile"
   role = aws_iam_role.EC2-CSYE6225.name
+  
 }
 

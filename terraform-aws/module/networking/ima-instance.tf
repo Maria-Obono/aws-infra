@@ -98,6 +98,7 @@ resource "aws_instance" "web_application" {
   ami                    = data.aws_ami.app_ami.id
   subnet_id = aws_subnet.public-subnet[count.index].id
   iam_instance_profile = aws_iam_instance_profile.maria_profile.id
+  
 
   //key_name = aws_key_pair.TF_key.key_name
   key_name = "Key"
@@ -113,13 +114,10 @@ resource "aws_instance" "web_application" {
               
               echo "HOST_DB=\${aws_db_instance.database-instance.address}" >> .env
               echo "BUCKET_NAME=${aws_s3_bucket.private_bucket.bucket}" >> .env
-              echo "AWS_ACCESS_KEY=AKIAT66YSMIHLIFBA3JD" >> .env
+              #echo "AWS_ACCESS_KEY=AKIAT66YSMIHLIFBA3JD" >> .env
               echo "USER_DB=csye6225" >> .env
               echo "PASSWORD_DB=MariaGloria1" >> .env
               echo "DB_NAME=csye6225" >> .env
-
-              sudo systemctl stop mysql.service
-              sudo systemctl restart mysql.service
 
               EOF
   
