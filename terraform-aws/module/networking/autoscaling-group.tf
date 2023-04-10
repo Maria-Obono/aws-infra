@@ -3,20 +3,11 @@ resource "aws_autoscaling_group" "web_app_asg" {
   name         = "asg_launch_config"
   vpc_zone_identifier = [aws_subnet.public-subnet[0].id, aws_subnet.public-subnet[1].id]
   
-mixed_instances_policy {
+
   launch_template {
-    launch_template_specification {
-      launch_template_id = aws_launch_template.app_launch_template.id
-    }
-    override {
-      instance_type = var.settings.web_app.instance_type
-    }
-  }
-}
-  //launch_template {
-    //id      = aws_launch_template.app_launch_template.id
-    //version = "$Latest"
-   // }
+    id      = aws_launch_template.app_launch_template.id
+    version = "$Latest"
+   }
 
 
   target_group_arns = [aws_lb_target_group.target_group.arn]
