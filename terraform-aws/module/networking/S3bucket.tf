@@ -3,7 +3,6 @@ byte_length = 8
 }
 resource "aws_s3_bucket" "private_bucket" {
   bucket = "my-bucket-${random_id.my-random-id.hex}"
-  acl    = "private"
   force_destroy = true
   
   server_side_encryption_configuration {
@@ -24,12 +23,14 @@ resource "aws_s3_bucket" "private_bucket" {
     }
   }
 
-  
-
   tags = {
     Environment = var.environment
     Owner       = var.db_username
     Name        = "my-bucket-${random_id.my-random-id.hex}"
+  }
+
+   versioning {
+    enabled = true
   }
 }
 
@@ -54,7 +55,7 @@ resource "aws_s3_bucket_policy" "private" {
         Resource = "${aws_s3_bucket.private_bucket.arn}/*"
         Condition = {
           Bool = {
-            "aws:SecureTransport": false
+            "aws:SecureTransport": true
           }
         }
       }

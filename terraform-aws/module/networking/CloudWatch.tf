@@ -50,7 +50,10 @@ resource "aws_cloudwatch_metric_alarm" "api_calls_metric" {
   statistic           = "Sum"
   threshold           = "1"
   alarm_description   = "Alarm for API Calls"
-  alarm_actions       = ["arn:aws:sns:us-east-1:123456789012:my-sns-topic"]
+  alarm_actions       = ["arn:aws:sns:us-east-1:123456789012:my-sns-topic", "${aws_autoscaling_policy.scaling_policy.arn}" ]
+  dimensions = {
+    AutoScalingGroupName = "${aws_autoscaling_group.web_app_asg.name}"
+  }
 }
 
 
