@@ -18,6 +18,7 @@ resource "aws_security_group" "load_balancer_sg" {
   name        = "load_balancer_sg"
   vpc_id      = aws_vpc.maria.id
   description = "allow TCP traffic on ports 80 and 443 from anywhere"
+
   ingress {
     from_port   = 80
     to_port     = 80
@@ -96,6 +97,7 @@ resource "aws_lb_target_group" "target_group" {
 }
 
 
+
 //resource "aws_lb_target_group_attachment" "asg_attachment" {
  // count = length(aws_autoscaling_group.web_app_asg)
  // target_group_arn = aws_lb_target_group.target_group.arn
@@ -105,6 +107,7 @@ resource "aws_lb_target_group" "target_group" {
   //  create_before_destroy = true
   //}
 //}
+
 
 resource "aws_lb_listener" "alb_http_listener" {
   load_balancer_arn = aws_lb.load_balancer.arn
@@ -127,8 +130,10 @@ resource "aws_lb_listener" "alb_https_listener" {
   load_balancer_arn = aws_lb.load_balancer.arn
   port              = "443"
   protocol          = "HTTPS"
+
   ssl_policy        = "ELBSecurityPolicy-2016-08"
   certificate_arn   = aws_acm_certificate.api.arn
+
 
   default_action {
     target_group_arn = aws_lb_target_group.target_group.arn
@@ -155,6 +160,7 @@ resource "aws_security_group" "app_sg" {
    security_groups = [aws_security_group.load_balancer_sg.id]
     
   }
+
   ingress {
     description      = "HTTP"
     from_port   = 80
@@ -162,6 +168,7 @@ resource "aws_security_group" "app_sg" {
     protocol    = "tcp"
     security_groups = [aws_security_group.load_balancer_sg.id]
   }
+
    ingress {
     description      = "NODEAPP"
     from_port        = 5050
@@ -170,6 +177,7 @@ resource "aws_security_group" "app_sg" {
     security_groups = [aws_security_group.load_balancer_sg.id]
    
   }
+
 ingress {
     description      = "SSH"
     from_port        = 22
@@ -178,6 +186,7 @@ ingress {
     security_groups = [aws_security_group.load_balancer_sg.id]
    
   }
+
   egress {
     from_port        = 0
     to_port          = 0
