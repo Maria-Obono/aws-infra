@@ -8,8 +8,6 @@ resource "aws_route53_record" "webapp_dns" {
   zone_id = "${data.aws_route53_zone.zone.zone_id}"
   name    = "demo.${var.domain_name}"
   type    = "A"
-  
- 
 alias {
     name                   = aws_lb.load_balancer.dns_name
     zone_id                = aws_lb.load_balancer.zone_id

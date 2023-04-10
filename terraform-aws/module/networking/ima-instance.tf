@@ -18,21 +18,18 @@ resource "aws_security_group" "load_balancer_sg" {
   name        = "load_balancer_sg"
   vpc_id      = aws_vpc.maria.id
   description = "allow TCP traffic on ports 80 and 443 from anywhere"
-
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -44,20 +41,10 @@ resource "aws_security_group" "load_balancer_sg" {
     Name = "LoadBalancer_SG"
   }
 }
-
 resource "aws_security_group_rule" "egress_alb_eg2_traffic" {
   type                     = "egress"
   from_port                = 5050
   to_port                  = 5050
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.load_balancer_sg.id
-  source_security_group_id = aws_security_group.app_sg.id
-}
-
-resource "aws_security_group_rule" "egress_alb_eg2_health_check" {
-  type                     = "egress"
-  from_port                = 5051
-  to_port                  = 5051
   protocol                 = "tcp"
   security_group_id        = aws_security_group.load_balancer_sg.id
   source_security_group_id = aws_security_group.app_sg.id
@@ -71,16 +58,11 @@ resource "aws_lb" "load_balancer" {
  
   ip_address_type    = "ipv4"
   enable_deletion_protection = false
-
-
   tags = {
     Name = "WebApp"
     Environment = "production"
-    
   }
-  
 }
-
 
 resource "aws_lb_target_group" "target_group" {
   name        = "my-target-group"
@@ -90,14 +72,14 @@ resource "aws_lb_target_group" "target_group" {
   target_type = "instance"
 
     health_check {
-      //enabled             = true
+      enabled             = true
       port               ="5050"
       protocol            = "HTTP"
       path                = "/healthz"
-      matcher             = 200
+      matcher             = "200-399"
       timeout             = 10
-      //unhealthy_threshold = 2
-      //healthy_threshold   = 5
+      unhealthy_threshold = 2
+      healthy_threshold   = 2
       interval            = 30
 
   }
@@ -113,9 +95,7 @@ resource "aws_lb_target_group" "target_group" {
   }
 }
 
-//data "aws_autoscaling_groups" "web_app_asg" {
- // names        = ["asg_launch_config"]
-//}
+
 //resource "aws_lb_target_group_attachment" "asg_attachment" {
  // count = length(aws_autoscaling_group.web_app_asg)
  // target_group_arn = aws_lb_target_group.target_group.arn
@@ -124,21 +104,6 @@ resource "aws_lb_target_group" "target_group" {
   // lifecycle {
   //  create_before_destroy = true
   //}
-//}
-
-//resource "aws_lb_target_group_attachment" "my-alb-target-group-attachment2" {
- // target_group_arn = aws_lb_target_group.target_group.arn
- // target_id        = aws_launch_template.app_launch_template.id
- // port             = 5050
-
-  //lifecycle {
- //   create_before_destroy = true
- // }
-//}
-
-//resource "aws_autoscaling_attachment" "terramino" {
-//  autoscaling_group_name = aws_autoscaling_group.web_app_asg.id
- // lb_target_group_arn   = aws_lb_target_group.target_group.arn
 //}
 
 resource "aws_lb_listener" "alb_http_listener" {
@@ -162,8 +127,8 @@ resource "aws_lb_listener" "alb_https_listener" {
   load_balancer_arn = aws_lb.load_balancer.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy = "ELBSecurityPolicy-2016-08"
-  certificate_arn = aws_acm_certificate.api.arn
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.api.arn
 
   default_action {
     target_group_arn = aws_lb_target_group.target_group.arn
@@ -182,8 +147,6 @@ resource "aws_security_group" "app_sg" {
   name        = "app_sg"
   vpc_id = aws_vpc.maria.id
   description = "allow on port 443, 80, and 22"
-
-  
   ingress {
     description      = "HTTPS"
     from_port        = 443
@@ -192,7 +155,6 @@ resource "aws_security_group" "app_sg" {
    security_groups = [aws_security_group.load_balancer_sg.id]
     
   }
-
   ingress {
     description      = "HTTP"
     from_port   = 80
@@ -200,7 +162,6 @@ resource "aws_security_group" "app_sg" {
     protocol    = "tcp"
     security_groups = [aws_security_group.load_balancer_sg.id]
   }
-
    ingress {
     description      = "NODEAPP"
     from_port        = 5050
@@ -210,15 +171,6 @@ resource "aws_security_group" "app_sg" {
    
   }
 ingress {
-    description      = "HEALTH"
-    from_port        = 5051
-    to_port          = 5051
-    protocol         = "tcp"
-    security_groups = [aws_security_group.load_balancer_sg.id]
-   
-  }
-
-ingress {
     description      = "SSH"
     from_port        = 22
     to_port          = 22
@@ -226,7 +178,6 @@ ingress {
     security_groups = [aws_security_group.load_balancer_sg.id]
    
   }
-
   egress {
     from_port        = 0
     to_port          = 0
@@ -246,20 +197,12 @@ data "aws_ami" "app_ami" {
    
 }
 
-resource "aws_network_interface" "eni" {
-  count = var.settings.web_app.count
-  subnet_id       = aws_subnet.public-subnet[0].id
-  security_groups = [aws_security_group.app_sg.id]
-}
-
 //resource "aws_instance" "web_application" {
   //count = var.settings.web_app.count
   //instance_type          = var.settings.web_app.instance_type
   //ami                    = data.aws_ami.app_ami.id
   //subnet_id = aws_subnet.public-subnet[count.index].id
   //iam_instance_profile = aws_iam_instance_profile.maria_profile.id
-
-
   resource "aws_launch_template" "app_launch_template" {
   name = "app_launch_template"
   image_id = data.aws_ami.app_ami.id
@@ -273,13 +216,11 @@ resource "aws_network_interface" "eni" {
   placement {
     availability_zone = data.aws_availability_zones.available.names[0]
   }
-
     network_interfaces {
     device_index = 0
     associate_public_ip_address = true
     subnet_id       = aws_subnet.public-subnet[0].id
     security_groups = [aws_security_group.app_sg.id]
-    //network_interface_id = aws_network_interface.eni.id
     
   }
 
@@ -288,25 +229,34 @@ resource "aws_network_interface" "eni" {
    arn= aws_iam_instance_profile.maria_profile.arn
   }
 
-
-
   user_data = base64encode( <<EOF
 
  #!/bin/bash
  sudo yum update -y
 
+wget https://s3.us-east-1.amazonaws.com/amazoncloudwatch-agent-us-east-1/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+sudo rpm -U ./amazon-cloudwatch-agent.rpm
+sudo cp /tmp/cloudwatch-agent-config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+    -a fetch-config \
+    -m ec2 \
+    -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+    -s
+sudo service amazon-cloudwatch-agent start
 
-              sudo yum install httpd -y
-              sudo service httpd start
+sudo systemctl enable amazon-cloudwatch-agent
+sudo systemctl start amazon-cloudwatch-agent
 
-              cd /home/ec2-user/Application
+ sudo yum install httpd -y
+ sudo service httpd start
+
+  cd /home/ec2-user/Application
               
-              echo "HOST_DB=\${aws_db_instance.database-instance.address}" >> .env
-              echo "BUCKET_NAME=${aws_s3_bucket.private_bucket.bucket}" >> .env
-              #echo "AWS_ACCESS_KEY=AKIAT66YSMIHLIFBA3JD" >> .env
-              echo "USER_DB=csye6225" >> .env
-              echo "PASSWORD_DB=MariaGloria1" >> .env
-              echo "DB_NAME=csye6225" >> .env
+  echo "HOST_DB=\${aws_db_instance.database-instance.address}" >> .env
+  echo "BUCKET_NAME=${aws_s3_bucket.private_bucket.bucket}" >> .env
+  echo "USER_DB=csye6225" >> .env
+  echo "PASSWORD_DB=MariaGloria1" >> .env
+  echo "DB_NAME=csye6225" >> .env
  
 
  EOF
@@ -314,9 +264,6 @@ resource "aws_network_interface" "eni" {
 
 disable_api_termination = false // Set this to false to disable protection against accidental termination
 
- //ebs_optimized = true
-  #default_version = 1
- // update_default_version = true
   block_device_mappings {
   device_name = "/dev/sda1"
   ebs {
@@ -326,9 +273,6 @@ disable_api_termination = false // Set this to false to disable protection again
      
   }
 }
-//monitoring {
-   // enabled = true
-  //}
     tag_specifications {
     resource_type = "instance"
     tags = {
@@ -339,7 +283,6 @@ disable_api_termination = false // Set this to false to disable protection again
 
 lifecycle {
   create_before_destroy = true
- 
 }
  
 }
