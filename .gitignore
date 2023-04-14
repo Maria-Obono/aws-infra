@@ -8,6 +8,8 @@
 *.build
 *.terraform
 *.terraform.lock.hcl
+*.pem
+*.key
 
 *.packer
 # Logs
