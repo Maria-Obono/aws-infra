@@ -9,6 +9,12 @@ resource "aws_db_subnet_group" "database-subnets" {
   subnet_ids = [for subnet in aws_subnet.private-subnet : subnet.id]
 }
 
+# Create a customer-managed KMS key
+resource "aws_kms_key" "database-key" {
+  description             = "Customer-managed KMS key for RDS encryption"
+  enable_key_rotation     = true
+}
+
 #Create a RDS security group
 
 resource "aws_security_group" "database" {
@@ -35,13 +41,11 @@ resource "aws_security_group" "database" {
 }
 
 #Create a RDS MySQL database instance in the VPC with our RDS subnet group and security group
-
 resource "aws_db_instance" "database-instance" {
   multi_az = false
   identifier                = var.settings.database.identifier
   allocated_storage         = 8
   engine                    = var.settings.database.engine
-  #engine_version            = "5.6.35"
   instance_class            = var.settings.database.instance_class
   db_name                   = var.settings.database.db_name
   username                  = var.db_username
@@ -51,7 +55,10 @@ resource "aws_db_instance" "database-instance" {
   publicly_accessible     = false
   skip_final_snapshot       = true
   final_snapshot_identifier = "Ignore"
+  storage_encrypted         = true  # add this line to enable storage encryption
+  kms_key_id                = aws_kms_key.database-key.arn
 }
+
 
 
 # Define the RDS parameter group

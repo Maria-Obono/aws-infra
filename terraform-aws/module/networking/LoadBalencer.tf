@@ -8,9 +8,9 @@ resource "aws_lb_target_group" "target_group" {
 
     health_check {
       //enabled             = true
-      port= 80
+      port= 5050
       protocol            = "HTTP"
-      path                = "/healthz"
+      path                = "/health"
       matcher             = "200"
       //timeout             = 60
      // unhealthy_threshold = 2
@@ -60,22 +60,26 @@ resource "aws_lb_listener" "http-listener" {
 }
 
 # Create a listener to accept HTTP traffic and forward it to instances on port 5050
-//resource "aws_lb_listener" "alb_https_listener" {
-  //load_balancer_arn = aws_lb.load_balancer.arn
-  //port              = "443"
- // protocol          = "HTTPS"
-  //ssl_policy        = "ELBSecurityPolicy-2016-08"
-  //certificate_arn   = aws_acm_certificate.api.arn
+resource "aws_lb_listener" "alb_https_listener" {
+  load_balancer_arn = aws_lb.load_balancer.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:us-east-1:272647741966:certificate/6af0d517-e8ee-4104-bad4-31afddb5718a"
 
-  //default_action {
-   // target_group_arn = aws_lb_target_group.target_group.arn
-    //type             = "forward"
-  //}
-  //depends_on = [aws_acm_certificate_validation.api]
-//}
-////output "custom_domain" {
-  //value = "https://${aws_acm_certificate.api.domain_name}/ping"
-//}
+  default_action {
+    target_group_arn = aws_lb_target_group.target_group.arn
+    type             = "forward"
+  }
+  
+}
+
+
+resource "aws_acm_certificate" "ssl_cert" {
+private_key      = "${file("../../../Certify/PrivateKey.pem")}"
+certificate_body = "${file("../../../Certify/Certificate.pem")}"
+certificate_chain = "${file("../../../Certify/CertificateChain.pem")}"
+}
 
 # Define the load balancer security group
 resource "aws_security_group" "load_balancer_sg" {

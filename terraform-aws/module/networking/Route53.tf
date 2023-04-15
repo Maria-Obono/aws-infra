@@ -40,14 +40,14 @@ resource "aws_route53_record" "www_dns" {
   }
 }
 
-data "aws_acm_certificate" "mycert" {
-  domain   = "demo.mariaobono.me"
-  
-}
+//resource "aws_acm_certificate" "mycert" {
+ // //domain   = "demo.mariaobono.me"
+//  CertificateArn": "arn:aws:acm:us-east-1:272647741966:certificate/6af0d517-e8ee-4104-bad4-31afddb5718a
+//}
 
-output "mycert_arn" {
-  value = data.aws_acm_certificate.mycert.arn
-}
+//output "mycert_arn" {
+ // value = aws_acm_certificate.mycert.arn
+//}
 
 output "ns-servers" {
   value = "${data.aws_route53_zone.zone.name_servers}"

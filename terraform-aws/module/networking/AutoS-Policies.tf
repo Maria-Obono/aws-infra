@@ -10,6 +10,9 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.web_app_asg.name
+    
+    InstanceId = "${aws_instance.web_application[0].id}"
+  
   }
 
   alarm_actions = [
@@ -29,6 +32,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.web_app_asg.name
+    InstanceId = "${aws_instance.web_application[0].id}"
   }
 
   alarm_actions = [

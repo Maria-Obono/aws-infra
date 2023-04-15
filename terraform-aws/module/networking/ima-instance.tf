@@ -109,6 +109,8 @@ sudo service amazon-cloudwatch-agent start
 sudo systemctl enable amazon-cloudwatch-agent
 sudo systemctl start amazon-cloudwatch-agent
 
+
+
  sudo yum install httpd -y
  sudo service httpd start
 
@@ -119,6 +121,7 @@ sudo systemctl start amazon-cloudwatch-agent
   echo "USER_DB=csye6225" >> .env
   echo "PASSWORD_DB=MariaGloria1" >> .env
   echo "DB_NAME=csye6225" >> .env
+
  
   EOF
 }
@@ -142,6 +145,9 @@ associate_public_ip_address = true
   root_block_device {
     volume_size = 50             // Set the root volume size to 50GB
     volume_type = "gp2"          // Set the root volume type to gp2
+     kms_key_id = aws_kms_key.customer_managed_key.arn
+     encrypted = true
+    
   }
    tags = {
       "Name" = "Terraform EC2_${count.index}"

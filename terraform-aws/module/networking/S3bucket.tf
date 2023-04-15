@@ -105,6 +105,8 @@ resource "aws_iam_role" "EC2-CSYE6225" {
       },
     ]
   })
+
+
 }
 
 resource "aws_iam_role_policy_attachment" "some_bucket_policy" {
