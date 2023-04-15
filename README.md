@@ -21,6 +21,7 @@ Create a public route in the public route table created above with the destinati
 
 Here is how to import a certificate using the AWS Command Line Interface (AWS CLI). Assuming:
 
+
 The PEM-encoded certificate is stored in a file named Certificate.pem.
 The PEM-encoded certificate chain is stored in a file named CertificateChain.pem.
 The PEM-encoded, unencrypted private key is stored in a file named PrivateKey.pem.
@@ -30,3 +31,4 @@ $ aws acm import-certificate --certificate fileb://Certificate.pem \
       --certificate-chain fileb://CertificateChain.pem \
       --private-key fileb://PrivateKey.pem
 If the import-certificate command is successful, it returns the Amazon Resource Name (ARN) of the imported certificate.
+

@@ -17,6 +17,7 @@ resource "aws_lb_target_group" "target_group" {
       healthy_threshold   = 2
       interval            = 30
 
+
   }
   
   tags = {
