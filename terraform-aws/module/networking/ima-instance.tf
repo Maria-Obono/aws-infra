@@ -160,6 +160,7 @@ resource "aws_security_group" "app_sg" {
     //cidr_blocks      = ["0.0.0.0/0"]
     security_groups = [aws_security_group.load_balancer_sg.id]
 
+
     
   }
 
@@ -197,7 +198,6 @@ ingress {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-
     //cidr_blocks = [ "0.0.0.0/0" ]
 
     security_groups = [aws_security_group.load_balancer_sg.id]
@@ -253,10 +253,8 @@ sudo service amazon-cloudwatch-agent start
 sudo systemctl enable amazon-cloudwatch-agent
 sudo systemctl start amazon-cloudwatch-agent
 
-  
-  iam_instance_profile {
-   arn= aws_iam_instance_profile.maria_profile.arn
-  }
+
+
 
 
  sudo yum install httpd -y
@@ -284,15 +282,6 @@ resource "aws_instance" "web_application" {
  #!/bin/bash
  sudo yum update -y
 
-wget https://s3.us-east-1.amazonaws.com/amazoncloudwatch-agent-us-east-1/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
-sudo rpm -U ./amazon-cloudwatch-agent.rpm
-sudo cp /tmp/cloudwatch-agent-config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
-    -a fetch-config \
-    -m ec2 \
-    -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
-    -s
-sudo service amazon-cloudwatch-agent start
 
   user_data = data.template_file.user_data.rendered
   vpc_security_group_ids = [aws_security_group.app_sg.id]

@@ -1,6 +1,7 @@
 data "aws_route53_zone" "zone" {
   name = "demo.${var.domain_name}"
 
+
 }
 
 # Create Route53 A record alias for the load balancer
@@ -11,6 +12,7 @@ resource "aws_route53_record" "webapp_dns" {
 
   //ttl     = "600"
 
+
   //records = [
      // "${aws_eip.myApp_eip[0].public_ip}"
   //]
@@ -20,16 +22,8 @@ resource "aws_route53_record" "webapp_dns" {
     zone_id                = aws_lb.load_balancer.zone_id
     evaluate_target_health = true
   }
-}
 
 
-alias {
-    name                   = aws_lb.load_balancer.dns_name
-    zone_id                = aws_lb.load_balancer.zone_id
-    evaluate_target_health = false
-   
-  }
- 
 }
 
 resource "aws_route53_record" "api_validation" {
@@ -63,6 +57,7 @@ resource "aws_route53_record" "www_dns" {
   name    = "www.demo.${var.domain_name}"
   type    = "A"
   //ttl     = "600"
+
 
   //records = [
   //  "${aws_eip.myApp_eip[0].public_ip}"
