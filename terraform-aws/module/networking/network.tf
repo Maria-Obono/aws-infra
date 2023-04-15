@@ -27,7 +27,7 @@ resource "aws_subnet" "public-subnet" {
 
   count = var.subnet_count.public
   vpc_id = aws_vpc.maria.id
- 
+ map_public_ip_on_launch = true
   cidr_block = var.public_subnet_cidr_blocks[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {

@@ -30,3 +30,4 @@ $ aws acm import-certificate --certificate fileb://Certificate.pem \
       --certificate-chain fileb://CertificateChain.pem \
       --private-key fileb://PrivateKey.pem
 If the import-certificate command is successful, it returns the Amazon Resource Name (ARN) of the imported certificate.
+
