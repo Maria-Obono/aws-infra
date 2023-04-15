@@ -107,9 +107,6 @@ resource "aws_iam_role" "EC2-CSYE6225" {
     ]
   })
 
-
-
-
 }
 
 

@@ -15,7 +15,8 @@ resource "aws_lb_target_group" "target_group" {
       //timeout             = 60
      // unhealthy_threshold = 2
       healthy_threshold   = 2
-      interval            = 60
+      interval            = 30
+
 
   }
   

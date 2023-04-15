@@ -1,7 +1,6 @@
 data "aws_route53_zone" "zone" {
   name = "demo.${var.domain_name}"
 
-
 }
 
 # Create Route53 A record alias for the load balancer
@@ -22,7 +21,6 @@ resource "aws_route53_record" "webapp_dns" {
     zone_id                = aws_lb.load_balancer.zone_id
     evaluate_target_health = true
   }
-
 
 }
 

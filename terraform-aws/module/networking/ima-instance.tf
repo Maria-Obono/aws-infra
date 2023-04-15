@@ -13,145 +13,13 @@
   
 //}
 
-# Define the load balancer security group
-resource "aws_security_group" "load_balancer_sg" {
-  name        = "load_balancer_sg"
-  vpc_id      = aws_vpc.maria.id
-  description = "allow TCP traffic on ports 80 and 443 from anywhere"
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "LoadBalancer_SG"
-  }
-}
-resource "aws_security_group_rule" "egress_alb_eg2_traffic" {
-  type                     = "egress"
-  from_port                = 5050
-  to_port                  = 5050
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.load_balancer_sg.id
-  source_security_group_id = aws_security_group.app_sg.id
-}
-resource "aws_lb" "load_balancer" {
-  name               = "web-elb"
-  internal           = false
-  load_balancer_type = "application"
-  subnets            = [aws_subnet.public-subnet[0].id, aws_subnet.public-subnet[1].id]
-  security_groups    = [aws_security_group.load_balancer_sg.id]
- 
-  ip_address_type    = "ipv4"
-  enable_deletion_protection = false
-  tags = {
-    Name = "WebApp"
-    Environment = "production"
-  }
-}
-
-resource "aws_lb_target_group" "target_group" {
-  name        = "my-target-group"
-  port        = 5050
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.maria.id
-  target_type = "instance"
-
-    health_check {
-      enabled             = true
-      port               ="5050"
-      protocol            = "HTTP"
-      path                = "/healthz"
-      matcher             = "200-399"
-      timeout             = 10
-      unhealthy_threshold = 2
-      healthy_threshold   = 2
-      interval            = 30
-
-  }
-  depends_on = [
-    aws_lb.load_balancer
-  ]
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = {
-    Name = "Terraform Target Group"
-  }
-}
-
-
-
-//resource "aws_lb_target_group_attachment" "asg_attachment" {
- // count = length(aws_autoscaling_group.web_app_asg)
- // target_group_arn = aws_lb_target_group.target_group.arn
- // target_id        = aws_autoscaling_group.web_app_asg[count.index].id
- // port             = 5050
-  // lifecycle {
-  //  create_before_destroy = true
-  //}
-//}
-
-
-resource "aws_lb_listener" "alb_http_listener" {
-  load_balancer_arn = aws_lb.load_balancer.arn
-  port =80
-  protocol = "HTTP"
-  default_action {
-    type= "redirect"
-
-    redirect {
-      port = 443
-      protocol = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-
-}
-
-# Create a listener to accept HTTP traffic and forward it to instances on port 5050
-resource "aws_lb_listener" "alb_https_listener" {
-  load_balancer_arn = aws_lb.load_balancer.arn
-  port              = "443"
-  protocol          = "HTTPS"
-
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.api.arn
-
-
-  default_action {
-    target_group_arn = aws_lb_target_group.target_group.arn
-    type             = "forward"
-    
-  }
-  depends_on = [aws_acm_certificate_validation.api]
-}
-
-output "custom_domain" {
-  value = "https://${aws_acm_certificate.api.domain_name}/ping"
-}
-
-//EC2 security group
 resource "aws_security_group" "app_sg" {
   name        = "app_sg"
   vpc_id = aws_vpc.maria.id
   description = "allow on port 443, 80, and 22"
+
+  
   ingress {
     description      = "HTTPS"
     from_port        = 443
@@ -159,17 +27,7 @@ resource "aws_security_group" "app_sg" {
     protocol         = "tcp"
     //cidr_blocks      = ["0.0.0.0/0"]
     security_groups = [aws_security_group.load_balancer_sg.id]
-
-
     
-  }
-
-  ingress {
-    description      = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = [aws_security_group.load_balancer_sg.id]
   }
 
    ingress {
@@ -182,7 +40,6 @@ resource "aws_security_group" "app_sg" {
    
   }
 
-
   ingress {
     description      = "HTTP"
     from_port        = 80
@@ -193,17 +50,16 @@ resource "aws_security_group" "app_sg" {
    
   }
 
+
 ingress {
     description      = "SSH"
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
     //cidr_blocks = [ "0.0.0.0/0" ]
-
     security_groups = [aws_security_group.load_balancer_sg.id]
    
   }
-
 
   ingress {
     description      = "All TCP"
@@ -215,7 +71,6 @@ ingress {
     
   }
 
-
   egress {
     from_port        = 0
     to_port          = 0
@@ -223,6 +78,8 @@ ingress {
     cidr_blocks      = ["0.0.0.0/0"]
     
   }
+
+
   tags = {
     Name = "Terraform_SG"
   }
@@ -232,7 +89,6 @@ data "aws_ami" "app_ami" {
   most_recent      = true
   name_regex       = "-*"
   //owners           = ["self"]
-
 }
 
 data "template_file" "user_data" {
@@ -252,8 +108,6 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 sudo service amazon-cloudwatch-agent start
 sudo systemctl enable amazon-cloudwatch-agent
 sudo systemctl start amazon-cloudwatch-agent
-
-
 
 
 
@@ -279,15 +133,14 @@ resource "aws_instance" "web_application" {
   subnet_id = aws_subnet.public-subnet[count.index].id
   iam_instance_profile = aws_iam_instance_profile.maria_profile.id
 
- #!/bin/bash
- sudo yum update -y
-
+  //key_name = aws_key_pair.TF_key.key_name
+  key_name = "Key"
 
   user_data = data.template_file.user_data.rendered
   vpc_security_group_ids = [aws_security_group.app_sg.id]
    
-
 disable_api_termination = false // Set this to false to disable protection against accidental termination
+associate_public_ip_address = true
 
   root_block_device {
     volume_size = 50             // Set the root volume size to 50GB
@@ -302,6 +155,6 @@ disable_api_termination = false // Set this to false to disable protection again
        role       = aws_iam_role.EC2-CSYE6225.name
 
     }
-
 }
 
+ 
