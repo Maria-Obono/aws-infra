@@ -70,7 +70,11 @@ resource "aws_security_group" "metrics_security_group" {
     to_port     = 8125
     protocol    = "udp"
     security_groups = [aws_security_group.app_sg.id]
+
+
   }
 }
+
+
 
 
