@@ -3,7 +3,6 @@ byte_length = 8
 }
 resource "aws_s3_bucket" "private_bucket" {
   bucket = "my-bucket-${random_id.my-random-id.hex}"
-  acl    = "private"
   force_destroy = true
   
   server_side_encryption_configuration {
@@ -24,12 +23,14 @@ resource "aws_s3_bucket" "private_bucket" {
     }
   }
 
-  
-
   tags = {
     Environment = var.environment
     Owner       = var.db_username
     Name        = "my-bucket-${random_id.my-random-id.hex}"
+  }
+
+   versioning {
+    enabled = true
   }
 }
 
@@ -54,7 +55,7 @@ resource "aws_s3_bucket_policy" "private" {
         Resource = "${aws_s3_bucket.private_bucket.arn}/*"
         Condition = {
           Bool = {
-            "aws:SecureTransport": false
+            "aws:SecureTransport": true
           }
         }
       }
@@ -106,22 +107,19 @@ resource "aws_iam_role" "EC2-CSYE6225" {
     ]
   })
 
-
 }
 
+
+ 
+}
 resource "aws_iam_role_policy_attachment" "some_bucket_policy" {
   role       = aws_iam_role.EC2-CSYE6225.name
   policy_arn = aws_iam_policy.WebAppS3.arn
 }
 
-resource "aws_iam_role_policy_attachment" "cloud_watch_policy" {
-  role       = aws_iam_role.EC2-CSYE6225.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-
-}
-
 resource "aws_iam_instance_profile" "maria_profile" {
   name = "maria-profile"
   role = aws_iam_role.EC2-CSYE6225.name
+  
 }
 
