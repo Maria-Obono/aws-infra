@@ -9,6 +9,9 @@
 *.terraform
 *.terraform.lock.hcl
 
+*.key
+*.pem
+
 *.packer
 # Logs
 logs

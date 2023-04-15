@@ -32,29 +32,48 @@ resource "aws_iam_policy" "cloudwatch_agent" {
   })
 }
 
-
-
 resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
   policy_arn = aws_iam_policy.cloudwatch_agent.arn
   role       = aws_iam_role.EC2-CSYE6225.name
 }
 
-# Custom metrics for API usage
-resource "aws_cloudwatch_metric_alarm" "api_calls_metric" {
-  alarm_name          = "api-calls-metric"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "API_Calls"
-  namespace           = "MyApp"
-  period              = "60"
-  statistic           = "Sum"
-  threshold           = "1"
-  alarm_description   = "Alarm for API Calls"
-  alarm_actions       = ["arn:aws:sns:us-east-1:123456789012:my-sns-topic", "${aws_autoscaling_policy.scaling_policy.arn}" ]
-  dimensions = {
-    AutoScalingGroupName = "${aws_autoscaling_group.web_app_asg.name}"
+
+
+resource "aws_iam_policy" "cloudwatch_metrics" {
+  name        = "cloudwatch-metrics-policy"
+  description = "Policy to allow registering metrics in CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_metrics" {
+  policy_arn = aws_iam_policy.cloudwatch_metrics.arn
+  role       = aws_iam_role.EC2-CSYE6225.name
+}
+resource "aws_security_group" "metrics_security_group" {
+  name_prefix = "metrics_security_group"
+  vpc_id = aws_vpc.maria.id
+
+  ingress {
+    from_port   = 8125
+    to_port     = 8125
+    protocol    = "udp"
+    security_groups = [aws_security_group.app_sg.id]
+
   }
 }
+
 
 
 

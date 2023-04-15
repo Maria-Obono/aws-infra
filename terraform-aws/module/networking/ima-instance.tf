@@ -157,7 +157,9 @@ resource "aws_security_group" "app_sg" {
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
-   security_groups = [aws_security_group.load_balancer_sg.id]
+    //cidr_blocks      = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.load_balancer_sg.id]
+
     
   }
 
@@ -174,6 +176,18 @@ resource "aws_security_group" "app_sg" {
     from_port        = 5050
     to_port          = 5050
     protocol         = "tcp"
+    //cidr_blocks      = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.load_balancer_sg.id]
+   
+  }
+
+
+  ingress {
+    description      = "HTTP"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    //cidr_blocks      = ["0.0.0.0/0"]
     security_groups = [aws_security_group.load_balancer_sg.id]
    
   }
@@ -183,9 +197,24 @@ ingress {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
+
+    //cidr_blocks = [ "0.0.0.0/0" ]
+
     security_groups = [aws_security_group.load_balancer_sg.id]
    
   }
+
+
+  ingress {
+    description      = "All TCP"
+    from_port        = 0
+    to_port          = 655
+    protocol         = "tcp"
+    //cidr_blocks      = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.load_balancer_sg.id]
+    
+  }
+
 
   egress {
     from_port        = 0
@@ -203,42 +232,54 @@ data "aws_ami" "app_ami" {
   most_recent      = true
   name_regex       = "-*"
   //owners           = ["self"]
-   
+
 }
 
-//resource "aws_instance" "web_application" {
-  //count = var.settings.web_app.count
-  //instance_type          = var.settings.web_app.instance_type
-  //ami                    = data.aws_ami.app_ami.id
-  //subnet_id = aws_subnet.public-subnet[count.index].id
-  //iam_instance_profile = aws_iam_instance_profile.maria_profile.id
-  resource "aws_launch_template" "app_launch_template" {
-  name = "app_launch_template"
-  image_id = data.aws_ami.app_ami.id
-  instance_type = var.settings.web_app.instance_type
-  
-  
-  //key_name = aws_key_pair.TF_key.key_name
-  key_name = "Key"
-  //vpc_security_group_ids = [aws_security_group.app_sg.id]
+data "template_file" "user_data" {
+  template = <<EOF
+#!/bin/bash
+ sudo yum update -y
 
-  placement {
-    availability_zone = data.aws_availability_zones.available.names[0]
-  }
-    network_interfaces {
-    device_index = 0
-    associate_public_ip_address = true
-    subnet_id       = aws_subnet.public-subnet[0].id
-    security_groups = [aws_security_group.app_sg.id]
-    
-  }
+wget https://s3.us-east-1.amazonaws.com/amazoncloudwatch-agent-us-east-1/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+sudo rpm -U ./amazon-cloudwatch-agent.rpm
+sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
+sudo cp cloudwatch-agent-config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+    -a fetch-config \
+    -m ec2 \
+    -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+    -s
+sudo service amazon-cloudwatch-agent start
+sudo systemctl enable amazon-cloudwatch-agent
+sudo systemctl start amazon-cloudwatch-agent
 
   
   iam_instance_profile {
    arn= aws_iam_instance_profile.maria_profile.arn
   }
 
-  user_data = base64encode( <<EOF
+
+ sudo yum install httpd -y
+ sudo service httpd start
+
+  cd /home/ec2-user/Application
+              
+  echo "HOST_DB=\${aws_db_instance.database-instance.address}" >> .env
+  echo "BUCKET_NAME=${aws_s3_bucket.private_bucket.bucket}" >> .env
+  echo "USER_DB=csye6225" >> .env
+  echo "PASSWORD_DB=MariaGloria1" >> .env
+  echo "DB_NAME=csye6225" >> .env
+
+ 
+  EOF
+}
+
+resource "aws_instance" "web_application" {
+  count = var.settings.web_app.count
+  instance_type          = var.settings.web_app.instance_type
+  ami                    = data.aws_ami.app_ami.id
+  subnet_id = aws_subnet.public-subnet[count.index].id
+  iam_instance_profile = aws_iam_instance_profile.maria_profile.id
 
  #!/bin/bash
  sudo yum update -y
@@ -253,46 +294,25 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
     -s
 sudo service amazon-cloudwatch-agent start
 
-sudo systemctl enable amazon-cloudwatch-agent
-sudo systemctl start amazon-cloudwatch-agent
-
- sudo yum install httpd -y
- sudo service httpd start
-
-  cd /home/ec2-user/Application
-              
-  echo "HOST_DB=\${aws_db_instance.database-instance.address}" >> .env
-  echo "BUCKET_NAME=${aws_s3_bucket.private_bucket.bucket}" >> .env
-  echo "USER_DB=csye6225" >> .env
-  echo "PASSWORD_DB=MariaGloria1" >> .env
-  echo "DB_NAME=csye6225" >> .env
- 
-
- EOF
- )
+  user_data = data.template_file.user_data.rendered
+  vpc_security_group_ids = [aws_security_group.app_sg.id]
+   
 
 disable_api_termination = false // Set this to false to disable protection against accidental termination
 
-  block_device_mappings {
-  device_name = "/dev/sda1"
-  ebs {
-    volume_size = 50
-    volume_type = "gp2"
-    delete_on_termination = true
-     
+  root_block_device {
+    volume_size = 50             // Set the root volume size to 50GB
+    volume_type = "gp2"          // Set the root volume type to gp2
+     kms_key_id = aws_kms_key.customer_managed_key.arn
+     encrypted = true
+    
   }
-}
-    tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name = "Terraform EC2"
-      Source="Autoscaling"
-    }
-  }
+   tags = {
+      "Name" = "Terraform EC2_${count.index}"
+       vpc_id      = aws_vpc.maria.id
+       role       = aws_iam_role.EC2-CSYE6225.name
 
-lifecycle {
-  create_before_destroy = true
-}
- 
+    }
+
 }
 
