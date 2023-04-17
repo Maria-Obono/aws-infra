@@ -69,8 +69,24 @@ resource "aws_security_group" "metrics_security_group" {
     from_port   = 8125
     to_port     = 8125
     protocol    = "udp"
-    security_groups = [aws_security_group.app_sg.id]
+    //security_groups = [aws_security_group.app_sg.id]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
+resource "aws_cloudwatch_log_group" "demo_log_group" {
+  name = "csye6225-demo"
+}
 
+resource "aws_cloudwatch_log_stream" "demo_log_stream" {
+  name           = "webapp"
+  log_group_name = aws_cloudwatch_log_group.demo_log_group.name
+}
+data "template_file" "cloudwatch_agent_config" {
+  template = file("${path.module}/cloudwatch-agent-config.json")
+
+  vars = {
+    log_group_name  = aws_cloudwatch_log_group.demo_log_group.name
+    log_stream_name = aws_cloudwatch_log_stream.demo_log_stream.name
+  }
+}

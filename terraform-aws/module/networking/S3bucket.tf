@@ -109,9 +109,6 @@ resource "aws_iam_role" "EC2-CSYE6225" {
 
 }
 
-
- 
-}
 resource "aws_iam_role_policy_attachment" "some_bucket_policy" {
   role       = aws_iam_role.EC2-CSYE6225.name
   policy_arn = aws_iam_policy.WebAppS3.arn

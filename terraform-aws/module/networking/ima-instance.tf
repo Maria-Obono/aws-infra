@@ -124,6 +124,7 @@ sudo systemctl start amazon-cloudwatch-agent
 
  
   EOF
+
 }
 
 resource "aws_instance" "web_application" {
@@ -132,6 +133,8 @@ resource "aws_instance" "web_application" {
   ami                    = data.aws_ami.app_ami.id
   subnet_id = aws_subnet.public-subnet[count.index].id
   iam_instance_profile = aws_iam_instance_profile.maria_profile.id
+
+depends_on = [aws_cloudwatch_log_stream.demo_log_stream]
 
   //key_name = aws_key_pair.TF_key.key_name
   key_name = "Key"
