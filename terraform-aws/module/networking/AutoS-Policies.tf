@@ -18,6 +18,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
   alarm_actions = [
     aws_autoscaling_policy.scale_up_policy.arn
   ]
+
 }
 
 resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
@@ -38,6 +39,7 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   alarm_actions = [
     aws_autoscaling_policy.scale_down_policy.arn
   ]
+
 }
 
 resource "aws_autoscaling_policy" "scale_up_policy" {
