@@ -2,8 +2,8 @@ resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
   alarm_name          = "cpu-usage-high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
+  metric_name         = "api.*"
+  namespace           = "Maria-App"
   period              = 60
   statistic           = "Average"
   threshold           = 5
@@ -25,8 +25,8 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   alarm_name          = "cpu-usage-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 1
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
+  metric_name         = "api.*"
+  namespace           = "Maria-App"
   period              = 60
   statistic           = "Average"
   threshold           = 3

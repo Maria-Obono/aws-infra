@@ -5,6 +5,7 @@ resource "aws_s3_bucket" "private_bucket" {
   bucket = "my-bucket-${random_id.my-random-id.hex}"
   force_destroy = true
   
+  
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
@@ -40,29 +41,6 @@ data "aws_s3_bucket" "private_bucket" {
 
 
 data "aws_caller_identity" "current" {}
-
-resource "aws_s3_bucket_policy" "private" {
-  bucket = aws_s3_bucket.private_bucket.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "DenyInsecureTransport"
-        Effect = "Deny"
-        Principal = "*"
-        Action = "s3:*"
-        Resource = "${aws_s3_bucket.private_bucket.arn}/*"
-        Condition = {
-          Bool = {
-            "aws:SecureTransport": true
-          }
-        }
-      }
-    ]
-  })
-}
-
 
 
 resource "aws_iam_policy" "WebAppS3" {
