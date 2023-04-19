@@ -76,6 +76,9 @@ resource "aws_security_group" "metrics_security_group" {
 
 resource "aws_cloudwatch_log_group" "demo_log_group" {
   name = "csye6225-demo"
+  //tags = {
+    //Environment = "Production"
+  //}
 }
 
 resource "aws_cloudwatch_log_stream" "demo_log_stream" {
@@ -90,3 +93,4 @@ data "template_file" "cloudwatch_agent_config" {
     log_stream_name = aws_cloudwatch_log_stream.demo_log_stream.name
   }
 }
+
