@@ -98,3 +98,25 @@ resource "aws_iam_instance_profile" "maria_profile" {
   
 }
 
+resource "aws_iam_policy" "launch_template_policy" {
+  name_prefix = "launch_template_policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateLaunchTemplateVersion",
+          "ec2:ModifyLaunchTemplateVersion",
+          "ec2:DeleteLaunchTemplateVersion"
+        ]
+        Resource = "arn:aws:ec2:*:*:launch-template/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "launch_template_policy_attachment" {
+  policy_arn = aws_iam_policy.launch_template_policy.arn
+   role = aws_iam_role.EC2-CSYE6225.name
+}

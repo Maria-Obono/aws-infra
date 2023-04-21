@@ -18,7 +18,7 @@ resource "aws_autoscaling_group" "web_app_asg" {
   health_check_type     = "ELB"
   termination_policies      = ["Default"]
 //instance_refresh {
-  //  strategy = "Rolling"
+    //strategy = "Rolling"
  // }
 
   tag  {
@@ -42,6 +42,7 @@ create_before_destroy = true
     //period = 60
     //unit = "Percent"
   //}
+
 }
 
 

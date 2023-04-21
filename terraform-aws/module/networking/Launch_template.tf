@@ -1,5 +1,5 @@
 resource "aws_launch_template" "app_launch_template" {
-  
+   name        = "asg_launch_config"
   image_id = data.aws_ami.app_ami.id
   instance_type = var.settings.web_app.instance_type
   key_name = "Key"
@@ -55,6 +55,7 @@ resource "aws_launch_template" "app_launch_template" {
 lifecycle {
   create_before_destroy = true
 }
+
  
 }
 
