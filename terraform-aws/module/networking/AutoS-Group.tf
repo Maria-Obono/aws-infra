@@ -32,22 +32,22 @@ resource "aws_autoscaling_group" "web_app_asg" {
     propagate_at_launch = true
   }
 # instance scale-in protection configuration
-  protect_from_scale_in = true
+  //protect_from_scale_in = true
   
 lifecycle {
-ignore_changes = [
+//ignore_changes = [
       //"tag",
       //"desired_capacity",
-      desired_capacity,
-      min_size,
-      max_size,
-      launch_template,
-      target_group_arns,
-      health_check_type,
-      health_check_grace_period,
-      vpc_zone_identifier,
-      termination_policies,
-    ]
+      //desired_capacity,
+      //min_size,
+      //max_size,
+      //launch_template,
+      //target_group_arns,
+      //health_check_type,
+      //health_check_grace_period,
+      //vpc_zone_identifier,
+      //termination_policies,
+   // ]
     create_before_destroy = true
 }
 
@@ -55,15 +55,15 @@ ignore_changes = [
 
 }
 
-resource "aws_autoscaling_lifecycle_hook" "example" {
-  name                 = "example-lifecycle-hook"
-  autoscaling_group_name = aws_autoscaling_group.web_app_asg.name
-  default_result       = "CONTINUE"
-  heartbeat_timeout    = 300
-  lifecycle_transition = "autoscaling:EC2_INSTANCE_TERMINATING"
+//resource "aws_autoscaling_lifecycle_hook" "example" {
+//  name                 = "example-lifecycle-hook"
+//  autoscaling_group_name = aws_autoscaling_group.web_app_asg.name
+//  default_result       = "CONTINUE"
+//  heartbeat_timeout    = 300
+ // lifecycle_transition = "autoscaling:EC2_INSTANCE_TERMINATING"
 
   
-}
+//}
 
 
  

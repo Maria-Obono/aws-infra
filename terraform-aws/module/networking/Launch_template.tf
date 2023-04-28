@@ -7,7 +7,11 @@ resource "aws_launch_template" "app_launch_template" {
   key_name                = "Key"
  
   disable_api_termination = false
+ depends_on = [aws_cloudwatch_log_stream.demo_log_stream]
 
+ iam_instance_profile {
+   arn= aws_iam_instance_profile.maria_profile.arn
+  }
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
