@@ -14,8 +14,8 @@ resource "aws_lb_target_group" "target_group" {
       matcher             = "200"
       //timeout             = 60
      // unhealthy_threshold = 2
-      healthy_threshold   = 2
-      interval            = 30
+     // healthy_threshold   = 2
+     // interval            = 30
 
 
   }
@@ -25,19 +25,20 @@ resource "aws_lb_target_group" "target_group" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "alb-tg-attach" {
-  count = var.settings.web_app.count
-  target_group_arn = aws_lb_target_group.target_group.arn
-  target_id        = aws_instance.web_application[count.index].id
-  port             = 5050
+//resource "aws_lb_target_group_attachment" "alb-tg-attach" {
+  //count = var.settings.web_app.count
+  //target_group_arn = aws_lb_target_group.target_group.arn
+  //target_id        = aws_instance.web_application[count.index].id
+ // port             = 5050
   
-}
+//}
+
 #create aws_lb
 resource "aws_lb" "load_balancer" {
   name               = "web-elb"
   internal           = false
   load_balancer_type = "application"
-  subnets            = [aws_subnet.public-subnet[0].id, aws_subnet.public-subnet[1].id]
+  subnets            = [aws_subnet.public-subnet[0].id, aws_subnet.public-subnet[1].id, aws_subnet.public-subnet[2].id]
   security_groups    = [aws_security_group.load_balancer_sg.id]
  
   ip_address_type    = "ipv4"
